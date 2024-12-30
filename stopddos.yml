@@ -1,0 +1,34 @@
+---
+- name: Stop image downloader and clean up
+  hosts: all
+  become: true
+
+  tasks:
+    - name: Stop the image downloader service
+      systemd:
+        name: image_downloader.service
+        state: stopped
+        enabled: false
+
+    - name: Remove the systemd service file
+      file:
+        path: /etc/systemd/system/image_downloader.service
+        state: absent
+
+    - name: Remove the download script
+      file:
+        path: /tmp/download_images_temp.sh
+        state: absent
+
+    - name: Remove the URL list file
+      file:
+        path: /tmp/final_image_urls_combined.txt
+        state: absent
+
+    - name: Reload systemd daemon
+      command: systemctl daemon-reload
+
+    - name: Restart the server
+      reboot:
+        reboot_timeout: 300
+
